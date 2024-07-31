@@ -1,0 +1,33 @@
+openapi: 3.0.1
+info:
+  title: SOLOINT API
+  description: This API provides interfaces for the SOLOINT application
+  contact:
+    name: Master Data Management Team
+  version: 1.0.0
+servers:
+  - url: https://redhat.com/soloInt/v1
+tags:
+  - name: soloInt
+paths:
+  /sanity:
+    get:
+      tags:
+        - soloCommon
+      summary: Get sanity information of service
+      description: Returns version and status information of the service
+      responses:
+        200:
+          description: Request has been accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SanityResponse'
+components:
+  schemas:
+    SanityResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any text

@@ -1,0 +1,13 @@
+soloint:
+  app-config:
+    main-class: com.redhat.soloint.SoloInt
+    swagger-resource: "openApi3/rh-mdm-solo-integration.yaml"
+
+spring:
+  application:
+    name: SOLOINT
+
+server:
+  port: 8082
+  servlet:
+    context-path: /soloInt/v1
