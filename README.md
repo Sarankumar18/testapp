@@ -1,0 +1,1 @@
+MDM SOLOINT - Artifact of SOLO(Standalone) INT(Integration)

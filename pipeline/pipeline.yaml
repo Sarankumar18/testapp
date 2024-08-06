@@ -1,0 +1,89 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-deploy-spring-boot
+spec:
+  workspaces:
+    - name: shared-workspace
+  params:
+    - name: deployment-name
+      type: string
+      description: Name of the deployment to be patched
+      default: my-spring-boot-app
+    - name: git-url
+      type: string
+      description: URL of the GitLab repository for the code of deployment
+      default: https://github.com/Sarankumar18/testapp.git
+    - name: git-revision
+      type: string
+      description: Revision to be used from the repository of the code for deployment
+      default: master
+    - name: IMAGE
+      type: string
+      description: Image to be built from the code
+      default: docker.io/your-dockerhub-username/your-application-image
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ""
+        - name: deleteExisting
+          value: "true"
+        - name: revision
+          value: $(params.git-revision)
+    - name: build-image
+      taskSpec:
+        steps:
+          - name: build
+            image: docker:20.10.7-dind
+            script: |
+              #!/bin/sh
+              dockerd-entrypoint.sh &
+
+              # Wait for Docker to start
+              while(! docker info > /dev/null 2>&1); do
+                echo "Waiting for Docker to start..."
+                sleep 1
+              done
+
+              # Build Docker image
+              docker build -t $(params.IMAGE) .
+
+              # Push Docker image
+              docker push $(params.IMAGE)
+        workspaces:
+          - name: source
+            workspace: shared-workspace
+      runAfter:
+        - fetch-repository
+    - name: apply-manifests
+      taskRef:
+        name: openshift-client
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: SCRIPT
+          value: |
+            oc apply -f manifests/
+      runAfter:
+        - build-image
+    - name: update-deployment
+      taskRef:
+        name: openshift-client
+        kind: ClusterTask
+      params:
+        - name: SCRIPT
+          value: |
+            oc set image deployment/$(params.deployment-name) $(params.deployment-name)=$(params.IMAGE)
+      runAfter:
+        - apply-manifests
