@@ -31,6 +31,7 @@ spec:
           value: "true"
         - name: revision
           value: master
+
     - name: build-image
       taskSpec:
         steps:
@@ -41,7 +42,7 @@ spec:
               dockerd-entrypoint.sh &
 
               # Wait for Docker to start
-              while(! docker info > /dev/null 2>&1); do
+              while ! docker info > /dev/null 2>&1; do
                 echo "Waiting for Docker to start..."
                 sleep 1
               done
@@ -56,6 +57,7 @@ spec:
             workspace: shared-workspace
       runAfter:
         - fetch-repository
+
     - name: apply-manifests
       taskRef:
         name: openshift-client
@@ -69,6 +71,7 @@ spec:
             oc apply -f manifests/
       runAfter:
         - build-image
+
     - name: update-deployment
       taskRef:
         name: openshift-client
