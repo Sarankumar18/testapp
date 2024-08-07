@@ -1,0 +1,80 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+
+metadata:
+  name: test-pipeline
+  annotations:
+    description: "Test Pipeline for Spring Boot App"
+    iconClass: "java"
+    tags: "spring-boot"
+
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      labels:
+        app: test-pipeline
+        project: ${PROJECT}
+      name: test-pipeline
+    spec:
+      output:
+        imageLabels:
+        - name: com.redhat.paas.appcode
+          value: TEST-PIPELINE-001
+        pushSecret:
+          name: images-paas-push-config
+        to:
+          kind: DockerImage
+          name: images.paas.redhat.com/${PROJECT}/test-pipeline:${VERSION}
+      runPolicy: Serial
+      source:
+        contextDir: .
+        git:
+          ref: ${GIT_REF}
+          uri: ${GIT_URI}
+        type: Git
+      strategy:
+        dockerStrategy:
+          noCache: true
+          env:
+          - name: GIT_SSL_NO_VERIFY
+            value: "true"
+          from:
+            kind: DockerImage
+            name: ${BASE_IMAGE}
+        type: Docker
+parameters:
+- description: PROJECT Name
+  displayName: PROJECT Name
+  name: PROJECT
+  required: false
+  value: spring-boot-project
+
+- description: Project Label to label application components.
+  displayName: Application Label
+  name: APP
+  value: test-pipeline
+  required: false
+
+- description: This is to specify the branch name for the buildConfig.
+  displayName: Git Branch Reference
+  name: GIT_REF
+  required: false
+  value: main
+
+- description: Application Code Base URL
+  displayName: Git URI
+  name: GIT_URI
+  required: false
+  value: https://github.com/Sarankumar18/testapp.git
+
+- description: Application Image Tag to build the latest app images.
+  displayName: Application Image Tag
+  name: VERSION
+  required: true
+
+- description: Base ImageStream to pull the base image for the application
+  displayName: Base ImageStream
+  name: BASE_IMAGE
+  required: false
+  value: registry.access.redhat.com/ubi9/openjdk-17
