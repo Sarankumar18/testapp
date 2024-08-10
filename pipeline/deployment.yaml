@@ -33,7 +33,7 @@ objects:
           imagePullPolicy: Always
           name: "rh-mdm-soloint"
           ports:
-            - containerPort: 8002
+            - containerPort: 8082
               protocol: TCP
           resources:
             requests:
