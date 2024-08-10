@@ -2,30 +2,30 @@ kind: Template
 apiVersion: template.openshift.io/v1
 
 metadata:
-  name: test-pipeline
+  name: rh-mdm-soloint
   annotations:
     description: "Test Pipeline for Spring Boot App"
     iconClass: "java"
-    tags: "spring-boot"
+    tags: "main"
 
 objects:
   - kind: BuildConfig
     apiVersion: v1
     metadata:
       labels:
-        app: test-pipeline
+        app: rh-mdm-soloint
         project: ${PROJECT}
-      name: test-pipeline
+      name: rh-mdm-soloint
     spec:
       output:
         imageLabels:
         - name: com.redhat.paas.appcode
-          value: TEST-PIPELINE-001
+          value: MDM-002
         pushSecret:
           name: images-paas-push-config
         to:
           kind: DockerImage
-          name: images.paas.redhat.com/${PROJECT}/test-pipeline:${VERSION}
+          name: images.paas.redhat.com/${PROJECT}/rh-mdm-soloint:${VERSION}
       runPolicy: Serial
       source:
         contextDir: .
